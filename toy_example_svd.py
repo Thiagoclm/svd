@@ -52,8 +52,10 @@ plt.show()
 # Modelling matrix X after SVD
 
 r = 20 # number of selected features
-X_hat = U[:,:r] @ Sigma[0:r,:r] @ V_T[:r,:r] # @ = np.matmul
+X_hat = U[:,:r] @ Sigma[:r,:r] @ V_T[:r,:] # @ = np.matmul
 print('Shape of X after SVD: ', np.shape(X_hat))
+print(X == X_hat)
+
 X_train, X_test, y_train, y_test = train_test_split(X_hat, y, test_size = 0.30, random_state=seed)
 
 clf_svd = RandomForestClassifier(random_state=seed)
