@@ -1,7 +1,9 @@
 from cv2 import normalize
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_classification
+from sklearn.feature_selection import mutual_info_classif
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, plot_confusion_matrix
@@ -54,9 +56,26 @@ plt.show()
 r = 20 # number of selected features
 X_hat = U[:,:r] @ Sigma[:r,:r] @ V_T[:r,:] # @ = np.matmul
 print('Shape of X after SVD: ', np.shape(X_hat))
-print(X == X_hat)
 
-X_train, X_test, y_train, y_test = train_test_split(X_hat, y, test_size = 0.30, random_state=seed)
+# Applying MI to select features
+
+mi = mutual_info_classif(X, y, random_state=seed)
+df_mi = pd.DataFrame(mi, columns=['MI'])
+df_mi.reset_index(inplace=True)
+
+df_mi = df_mi.sort_values(by='MI', ascending=False)
+print(df_mi)
+
+columns_selected = df_mi.iloc[:,1].head(r)
+indexes = columns_selected.index
+
+X_selected = pd.DataFrame(X).iloc[:,indexes]
+print(X_selected.shape)
+
+
+# Modelling smaller dataset
+
+X_train, X_test, y_train, y_test = train_test_split(X_selected, y, test_size = 0.30, random_state=seed)
 
 clf_svd = RandomForestClassifier(random_state=seed)
 
